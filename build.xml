@@ -1,0 +1,226 @@
+<?xml version="1.0"  encoding="utf-8" ?>
+<project name="ydjt" basedir="." default="release">
+
+	<property environment="env"/>
+  <tstamp>
+    <format property="NOW" pattern="yyyyMMddHHmm"/>
+  	<format property="TODAY" pattern="yyyyMMdd"/>
+  </tstamp>
+  <property name="app.name" value="ydjt"/>
+	<property name="deploy.server.name" value=""/>
+	<property name="deploy.server.ip" value=""/>
+	<property name="deploy.dir" value=""/>
+	<property name="ant.build.javac.target" value="1.5"/>
+	<property name="ant.build.javac.source" value="1.5"/>
+	<property name="java-src.dir" value="${basedir}/src"/>
+	<property name="java-test.dir" value="${basedir}/test"/>
+	<property name="java-bin.dir" value="${basedir}/bin"/>
+	<basename file="${java-bin.dir}" property="java-bin.dir.name"/>
+	<property name="java-lib.dir" value="${basedir}/www/WEB-INF/lib"/>
+	<property name="java-ext.dir" value="${basedir}/lib"/>
+	<property name="java-lib_src.dir" value="${basedir}/lib_src"/>
+	<property name="java-www.dir" value="${basedir}/www"/>
+	<basename file="${java-www.dir}" property="java-www.dir.name"/>
+
+	<property name="java-bin.jar" value="${basedir}/${app.name}.jar"/>
+	<basename file="${java-bin.jar}" property="java-bin.jar.name"/>
+	<property name="java-bin.war" value="${basedir}/${app.name}.war"/>
+	<property name="java-src.jar" value="${basedir}/${app.name}-src.jar"/>
+	<property name="java-test.jar" value="${basedir}/${app.name}-test.jar"/>
+	<property name="jspack-yui.dir" value="${java-www.dir}/js-yui"/>
+	<property name="jspack-gg.dir" value="${java-www.dir}/js-gg"/>
+	<property name="app.zip" value="${basedir}/${app.name}_${NOW}.zip"/>
+	<property name="build.compiler" value="org.eclipse.jdt.core.JDTCompilerAdapter"/>
+
+	<taskdef resource="net/sf/antcontrib/antcontrib.properties"/>
+
+	<path id="java.classpath">
+		<fileset dir="${basedir}/lib">
+			<include name="*.jar"/>
+		</fileset>
+		<fileset dir="${basedir}/www/WEB-INF/lib">
+			<include name="*.jar"/>
+		</fileset>
+	</path>
+
+	<zipfileset id="fs-bin" dir="${java-bin.dir}" prefix="${java-bin.dir.name}">
+		<include name="META-INF/ydjt/**"/>
+		<include name="ydjt_sample.properties"/>
+		<include name="ydjt.properties"/>
+	</zipfileset>
+
+	<zipfileset id="fs-www" dir="${java-www.dir}" prefix="${java-www.dir.name}">
+		<include name="common/**"/>
+		<include name="css/**"/>
+		<include name="image/**"/>
+		<include name="js/ckeditor/**"/>
+		<include name="js/grid/**"/>
+		<include name="js/jquery/**"/>
+		<include name="WEB-INF/page/**"/>
+		<include name="WEB-INF/test-web.xml"/>
+		<include name="WEB-INF/web.xml"/>
+		<include name="WEB-INF/weblogic.xml"/>
+		<exclude name="WEB-INF/page/test*.jsp"/>
+	</zipfileset>
+
+	<zipfileset id="fs-war" dir="${java-www.dir}" prefix="">
+		<include name="common/**"/>
+		<include name="css/**"/>
+		<include name="image/**"/>
+		<include name="js/**"/>
+		<include name="WEB-INF/page/**"/>
+		<include name="WEB-INF/test-web.xml"/>
+		<include name="WEB-INF/web.xml"/>
+		<include name="WEB-INF/weblogic.xml"/>
+		<include name="WEB-INF/classes/**"/>
+		<include name="index.html"/>
+	</zipfileset>
+
+	<zipfileset id="fs-src" dir="${basedir}">
+		<include name="src/**"/>
+		<include name="test/**"/>
+		<include name=".classpath"/>
+		<include name=".project"/>
+		<include name="build.xml"/>
+	</zipfileset>
+
+	<target name="clean">
+		<delete dir="${java-bin.dir}"/>
+		<!--delete includeEmptyDirs="true">
+			<fileset dir="${java-bin.dir}" includes="**/*"/>
+		</delete-->
+	</target>
+
+	<target name="copy">
+		<mkdir dir="${java-bin.dir}"/>
+	  <copy todir="${java-bin.dir}" verbose="false">
+			<fileset dir="${java-src.dir}">
+				<include name="ehcache.xml"/>
+				<include name="ydjt_sample.properties"/>
+				<include name="ydjt.properties"/>
+				<include name="log4j.xml"/>
+				<include name="quartz.properties"/>
+				<include name="shiro.ini"/>
+				<include name="data/**"/>
+				<include name="langs/**"/>
+				<include name="META-INF/**"/>
+			</fileset>
+	  	<!--fileset dir="${java-test.dir}">
+	  		<include name="test-aop1.xml"/>
+	  		<include name="test-aop2.xml"/>
+	  		<include name="test.properties"/>
+	  		<include name="transactions.properties"/>
+	  		<include name="META-INF/**"/>
+	  	</fileset-->
+	  </copy>
+	</target>
+
+	<target name="build-src">
+		<mkdir dir="${java-bin.dir}"/>
+		<echo>Using java version: ${ant.java.version}</echo>
+		<javac debug="on" fork="false" srcdir="${java-src.dir}" destdir="${java-bin.dir}" listfiles="false" failonerror="false" includeantruntime="true" encoding="UTF-8" source="1.6" target="1.6">
+			<compilerarg value="-nowarn"/>
+			<classpath refid="java.classpath"/>
+		</javac>
+	</target>
+
+	<target name="build-test">
+		<mkdir dir="${java-bin.dir}"/>
+		<echo>Using java version: ${ant.java.version}</echo>
+		<javac debug="on" fork="false" srcdir="${java-test.dir}" destdir="${java-bin.dir}" listfiles="false" failonerror="false" includeantruntime="true" encoding="UTF-8" source="1.6" target="1.6">
+			<compilerarg value="-nowarn"/>
+			<classpath refid="java.classpath"/>
+		</javac>
+	</target>
+
+	<target name="build" depends="build-src, build-test, copy">
+		<delete file="${java-bin.jar}"/>
+		<jar destfile="${java-bin.jar}" update="true">
+			<fileset dir="${java-bin.dir}">
+				<!--exclude name="com/test/**"/-->
+			</fileset>
+		</jar>
+	</target>
+
+	<target name="rebuild" depends="clean, build"/>
+	<target name="release" depends="rebuild, pack-all"/>
+
+	<target name="pack-source">
+		<!--delete file="${basedir}/${app.name}-src.zip"/-->
+		<zip destfile="${basedir}/${app.name}_src_${TODAY}.zip" update="true" encoding="utf-8">
+			<zipfileset refid="fs-src"/>
+			<zipfileset refid="fs-www"/>
+			<zipfileset dir="${java-www.dir}/js" includes="**/*.js" prefix="www/js"/>
+		</zip>
+	</target>
+
+	<target name="pack-war">
+		<jar destfile="${basedir}/${app.name}.war" update="true">
+			<fileset dir="${java-www.dir}">
+				<exclude name="WEB-INF/classes/com/test/**"/>
+				<exclude name="WEB-INF/lib/*.jar"/>
+			</fileset>
+		</jar>
+	</target>
+
+	<target name="pack-server" depends="build, jspack-gg">
+		<delete file="${basedir}/${app.name}_server_${TODAY}.zip"/>
+		<zip destfile="${basedir}/${app.name}_server_${TODAY}.zip" update="true" encoding="utf-8">
+			<!--zipfileset refid="fs-bin"/-->
+			<zipfileset refid="fs-www"/>
+			<zipfileset dir="${java-www.dir}/js-gg" includes="**/*.js" prefix="www/js"/>
+			<zipfileset dir="${basedir}" includes="${java-bin.jar.name}"/>
+		</zip>
+	</target>
+
+	<target name="pack-all" depends="pack-source, pack-server" />
+
+	<!--compress js file by YUI compressor-->
+	<target name="jspack-yui" description="yui compressor: pack js">
+		<property name="yui.compress" value="${basedir}/lib/yuicompressor-2.4.2.jar"/>
+		<apply executable="java" parallel="false" verbose="true" dest="${jspack-yui.dir}" taskname="js.compile">
+			<fileset dir="${java-www.dir}/js">
+				<include name="*.js"/>
+			</fileset>
+			<arg line="-jar"/>
+			<arg path="${yui.compress}" />
+			<arg line="--type js --charset UTF-8 -o" />
+			<mapper type="glob" from="*.js" to="*.js" />
+			<targetfile />
+		</apply>
+	</target>
+
+	<!--compress js file by Google Closure Compiler-->
+	<target name="jspack-gg" description="google compressor: pack js">
+		<property name="google.compress" value="${basedir}/lib/compiler.jar" />
+		<apply executable="java" parallel="false" verbose="true" dest="${jspack-gg.dir}" taskname="js.compile">
+			<fileset dir="${java-www.dir}/js">
+				<include name="*.js"/>
+			</fileset>
+			<arg line="-jar"/>
+			<arg path="${google.compress}" />
+			<arg line="--js" />
+			<srcfile/>
+			<arg line="--js_output_file"/>
+			<mapper type="glob" from="*.js" to="*.js" />
+			<targetfile />
+		</apply>
+	</target>
+
+	<target name="zz_foo">
+		<foreach list="" target="zz_bar" param="xxx" delimiter=",">
+		  <fileset dir="${java-www.dir}/js" casesensitive="yes">
+		    <include name="*.js"/>
+		  </fileset>
+		</foreach>
+	</target>
+
+	<target name="zz_bar">
+		<!--java fork="true" classname="com.google.javascript.jscomp.CommandLineRunner" classpathref="java.classpath">
+			<arg value="-help"/>
+		</java-->
+		<echo>${xxx}</echo>
+		<echo>${java-bin.dir}</echo>
+		<echo>${java-bin.dir.name}</echo>
+	</target>
+</project>

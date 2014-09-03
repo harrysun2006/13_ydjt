@@ -1,0 +1,4 @@
+﻿ydjt.properties, ydjt-persistence.xml: Oracle数据库, 正式运行环境
+
+EXP USERID=YDJT/ADMIN@XE FILE=YDJT.DMP
+IMP USERID=YDJT/ADMIN@XE FILE=YDJT.DMP FROMUSER=YDJT TOUSER=YDJT

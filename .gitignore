@@ -1,0 +1,10 @@
+hs_err_pid*
+.settings/
+bin/
+data/
+doc/
+lib-src/
+temp/
+upload/
+www/WEB-INF/classes
+www0/

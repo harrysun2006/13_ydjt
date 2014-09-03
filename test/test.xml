@@ -1,0 +1,19 @@
+<?xml version="1.0"?> 
+<?xml-stylesheet type="text/xsl" href="1.xsl"?>
+<persons>
+	<person>
+		<name>Alex</name>
+		<age>25</age>
+		<tel>66666666</tel>
+	</person>
+	<person>
+		<name>Ben</name>
+		<age>26</age>
+		<tel>66666667</tel>
+	</person>
+	<person>
+		<name>Cindy</name>
+		<age>28</age>
+		<tel>66666669</tel>
+	</person>
+</persons>
