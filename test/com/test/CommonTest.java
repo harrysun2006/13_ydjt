@@ -16,6 +16,7 @@ import java.util.UUID;
 
 import org.apache.shiro.crypto.hash.Md5Hash;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
+import org.h2.tools.Server;
 import org.junit.Assert;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
@@ -47,6 +48,7 @@ import com.test.service.BServiceImpl;
  */
 public class CommonTest {
 
+	private static final String[] H2_SERVER_ARGS = {"-tcp", "-tcpAllowOthers", "-web", "-webAllowOthers", "-baseDir", ""};
   private String name;
 
   public String getName() {
@@ -506,18 +508,25 @@ public class CommonTest {
     
   }
 
+  protected static void test63() throws Exception {
+    String dir = System.getProperty("user.dir");
+    H2_SERVER_ARGS[H2_SERVER_ARGS.length-1] = dir + "/data";
+    Server.main(H2_SERVER_ARGS);
+  }
+
   public static void main(String[] argv) throws Exception {
     try {
-      test28();
+      // test28();
       // test01(); System.exit(0);
       // Mocker.init("test");
       // Mocker.init();
       // UserService.login("admin", "admin");
       // test51();
+    	test63();
     } catch (Exception e) {
       e.printStackTrace();
     }
-    System.exit(0);
+    // System.exit(0);
   }
 
 }
